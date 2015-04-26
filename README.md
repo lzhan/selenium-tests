@@ -17,7 +17,7 @@ This is a funtional test suite to test GoToWebinar Web UI.
 ## Installation
 
 * `$ git clone git@github.com:lzhan/selenium-tests.git`
-* Open file update chromedriver path
+* Update chromedriver path in ./src/test/resources/datafile.properties
 * `mvn integration-test`
 
 ## License
