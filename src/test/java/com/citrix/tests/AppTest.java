@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 import java.io.IOException;
 import java.util.Properties;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.List;
 import org.openqa.selenium.JavascriptExecutor;
 import java.text.SimpleDateFormat;
 import org.openqa.selenium.By;
@@ -45,17 +47,16 @@ public class AppTest {
     public static Object[][] primeNumbers() {
         Date date = new Date();
         String day = getDate(date);
-        return new Object[][] {{"Meeting 1", "This is the first meeting", day, "9:00", "AM", "10:00", "Pacific"}};
+        return new Object[][] {{"Meeting 1", "This is the first meeting", day, "9:00", "AM", "10:00", "Alaska"}};
     }
 	
     private static String getDate(Date date){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy MM dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, yyyy");
         Calendar c = Calendar.getInstance();
         c.setTime(date);
         c.add(Calendar.DATE, 3);
         String dt = sdf.format(c.getTime());
-        String[] tokens = dt.split(" ");
-        return tokens[2];
+        return dt;
     }
  
     @Test(groups = { "login" })
@@ -80,8 +81,9 @@ public class AppTest {
         driver.findElement(By.id("description")).sendKeys(desc);
 		
         //Bring up calendar and select a date
+		String[] tokens = date.split(" ");
         driver.findElement(By.className("ui-datepicker-trigger")).click();
-        driver.findElement(By.xpath("//a[text()='" + date + "']")).click();
+        driver.findElement(By.xpath("//a[text()='" + tokens[2].replace(",", "") + "']")).click();
 
         //Set starting time
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -106,7 +108,7 @@ public class AppTest {
         arrow.findElement(By.className("arrow")).click();
         select = driver.findElement(By.id("webinarTimesForm_timeZone__menu"));
         List<WebElement> tzone = select.findElements(By.className("ellipsis"));
-        tzone.get(0).click();
+        tzone.get(2).click();
  
         //Select locale
         arrow = driver.findElement(By.id("language_trig"));
@@ -115,26 +117,46 @@ public class AppTest {
         List<WebElement> lang = select.findElements(By.className("ellipsis"));
         lang.get(5).click();
         
-        //driver.findElement(By.id("schedule.submit.button")).click();
+        driver.findElement(By.id("schedule.submit.button")).click();
     }
 	
-    @Test(dependsOnGroups = { "login" })
-    public void testExistingWebinar(){
-        driver.navigate().to("https://global.gotowebinar.com/webinars.tmpl");
-		
-        //driver.findElement(By.linkText("/manageWebinar.tmpl?webinar=5336905562490408193")).click();
-        driver.findElement(By.id("webName")).click();
+    @Test(dependsOnGroups = { "login" }, dataProvider = "test1")
+    public void testCreateWebinarConf(String name, String desc, String date, String starttime, String am, String endtime, String timezone){
+
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-        assertEquals(driver.findElement(By.id("trainingName")).getText(), "Fake meeting for testing", "Wrong name");
-        assertEquals(driver.findElement(By.id("trainingDesc")).getText(), "Testing meeting scheduling module.", "Wrong description");
-        assertEquals(driver.findElement(By.id("dateTime")).getText(), "Mon, Apr 27, 2015 10:00 AM - 11:00 AM SST", "Wrong time");
+        assertEquals(driver.findElement(By.id("trainingName")).getText(), name);
+        assertEquals(driver.findElement(By.id("trainingDesc")).getText(), desc);
+        assertEquals(driver.findElement(By.id("dateTime")).getText(), date + " " + starttime + " " + am + " - " + endtime + " " + am + " AKDT", "Wrong time");
         assertEquals(driver.findElement(By.id("locale")).getText(), "简体中文", "Wrong locale");
+
+        String id = driver.findElement(By.id("WebinarInfoID")).getText();
+
+		//Check if newly added webminar is listed in the "My Webinars" page
+        driver.navigate().to("https://global.gotowebinar.com/webinars.tmpl");
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+
+		int index = 0;
+		List<WebElement> listedId = driver.findElements(By.className("myWebinarDetailInfo"));
+		Iterator<WebElement> it = listedId.iterator();
+		while(it.hasNext()){
+			String text = it.next().getText();
+			if(text.contains("Webinar ID")) {
+				if(text.contains(id)){
+					break;
+				}
+				index++;
+			}
+		}
+		List<WebElement> listedNames = driver.findElements(By.id("webName"));
+        assertEquals(listedNames.get(index).getText(), name, "Wrong name");
+		List<WebElement> listedDate = driver.findElements(By.className("myWebinarDate"));
+        assertEquals(listedDate.get(index*2+1).getText(), date.substring(0, 11), "Wrong date");
     }
 	
  
     @AfterTest
     public void closeSelenium(){
         //Shutdown the browser
-        //driver.quit();
+        driver.quit();
     }
 }
