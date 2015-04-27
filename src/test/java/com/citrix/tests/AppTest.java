@@ -131,25 +131,25 @@ public class AppTest {
 
         String id = driver.findElement(By.id("WebinarInfoID")).getText();
 
-		//Check if newly added webminar is listed in the "My Webinars" page
+        //Check if newly added webminar is listed in the "My Webinars" page
         driver.navigate().to("https://global.gotowebinar.com/webinars.tmpl");
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
-		int index = 0;
-		List<WebElement> listedId = driver.findElements(By.className("myWebinarDetailInfo"));
-		Iterator<WebElement> it = listedId.iterator();
-		while(it.hasNext()){
-			String text = it.next().getText();
-			if(text.contains("Webinar ID")) {
-				if(text.contains(id)){
-					break;
-				}
-				index++;
-			}
-		}
-		List<WebElement> listedNames = driver.findElements(By.id("webName"));
+        int index = 0;
+        List<WebElement> listedId = driver.findElements(By.className("myWebinarDetailInfo"));
+        Iterator<WebElement> it = listedId.iterator();
+        while(it.hasNext()){
+            String text = it.next().getText();
+            if(text.contains("Webinar ID")) {
+                if(text.contains(id)){
+                    break;
+                }
+                index++;
+            }
+        }
+        List<WebElement> listedNames = driver.findElements(By.id("webName"));
         assertEquals(listedNames.get(index).getText(), name, "Wrong name");
-		List<WebElement> listedDate = driver.findElements(By.className("myWebinarDate"));
+        List<WebElement> listedDate = driver.findElements(By.className("myWebinarDate"));
         assertEquals(listedDate.get(index*2+1).getText(), date.substring(0, 11), "Wrong date");
     }
 	
