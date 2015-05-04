@@ -72,9 +72,6 @@ This is a funtional test suite to test GoToWebinar Web UI.
 * "Training Videos" section
 * "Join the GoToWebinar Community" section
 
-
-
-
 ## License
 
 The content of this project is licensed under the [MIT license](http://opensource.org/licenses/mit-license.php).

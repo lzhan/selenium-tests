@@ -44,7 +44,7 @@ public class AppTest {
     }
 	
     @DataProvider(name = "test1")
-    public static Object[][] primeNumbers() {
+    public static Object[][] meeting() {
         Date date = new Date();
         String day = getDate(date);
         return new Object[][] {{"Meeting 1", "This is the first meeting", day, "9:00", "AM", "10:00", "Alaska"}};
